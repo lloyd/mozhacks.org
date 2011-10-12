@@ -42,6 +42,43 @@ function gotVerifiedEmail(assertion) {
   }
 }
 
+function convertToSaved(row) {
+  alert("converting row to saved");
+}
+
+function manipulateRecord() {
+  if ($(this).text() === 'save') {
+    // user is trying to save a record (new or existing)
+    var row = $(this).parent().parent();
+    var data = {
+      name: row.find("input.name").val(),
+      host: row.find("input.host").val(),
+      desc: row.find("input.desc").val(),
+      viz:  row.find("input.viz").attr('checked') ? true : false
+    };
+    
+    $.ajax({
+      type: 'POST',
+      url: '/api/save',
+      data: data,
+      success: function(res, status, xhr) {
+        if (!res.success) {
+          alert("couldn't save record: " + res.reason);
+        } else {
+          convertToSaved(row);
+        }
+      },
+      error: function(res, status, xhr) {
+        alert("failed to save record: " + res.reason);
+      }
+    });
+  } else if ($(this).text() === 'delete') {
+    // user is trying to delete a record
+  } else if ($(this).text() === 'edit') {
+    // user is trying to edit a record
+  }    
+}
+
 // at startup let's check to see whether we're authenticated to
 // myfavoritebeer (have existing cookie), and update the UI accordingly
 $(document).ready(function() {
@@ -77,8 +114,16 @@ $(document).ready(function() {
 
   // when the user clicks 'create hack'...
   $("#create_hack").click(function() {
-    $("<tr><td><input class='hostname'/></td><td><input class='desc'></input></td><td><input type='checkbox'></td><td><div class='button rounded_box'>create</div></td></tr>")
+    $("<tr>" +
+      "<td><input class='name'/></td>" +
+      "<td><input class='host'/></td>" +
+      "<td><input class='desc'></input></td>" +
+      "<td><input class='viz' type='checkbox'></td><td>" +
+      "<div class='button rounded_box'>save</div></td></tr>")
       .appendTo("#control table");
+    // re-bind all existing buttons
+    $("#control table div.button").unbind();
+    $("#control table div.button").click(manipulateRecord);
   });
 
   // basic routing

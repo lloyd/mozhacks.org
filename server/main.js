@@ -164,33 +164,36 @@ app.post("/api/logout", function (req, res) {
   res.json(true);
 });
 
-// /api/get requires an authenticated session, and accesses the current user's favorite
-// beer out of the database.
-app.get("/api/get", function (req, res) {
+function checkAuth(req, res, next) {
   var email;
 
   if (req.session && typeof req.session.email === 'string') email = req.session.email;
 
   if (!email) {
     res.writeHead(400, {"Content-Type": "text/plain"});
-    res.write("Bad Request: you must be authenticated to get your beer");
+    res.write("Bad Request: you must be authenticated to call this API");
     res.end();
     return;
   }
 
+  next();
+}
+
+function checkDB(req, res, next) {
   if (!havePersistence) {
     console.log("WARNING: get is a no-op!  we have no database configured");
     return res.json("no database");
   }
+  next();
+}
 
-  db.get(determineEnvironment(req), email, function(err, beer) {
-    if (err) {
-      console.log("error getting beer for", email); 
-      res.writeHead(500);
-      res.end();
-    } else {
-      res.json(beer);
-    }
+
+// /api/get requires an authenticated session, and accesses the current user's favorite
+// beer out of the database.
+app.post("/api/save", checkAuth, checkDB, function (req, res) {
+  res.json({
+    success: false,
+    reason: "not implemented"
   });
 });
 
