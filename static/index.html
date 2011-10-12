@@ -56,6 +56,16 @@ body {
   margin-top: 5em;
 }
 
+#manage {
+  display: none;
+}
+
+#sign_in > img {
+  margin-top: .5em;
+  margin-left: 1em;
+  cursor: pointer;
+}
+
 </style>
   </head>
   <body>
@@ -74,6 +84,20 @@ body {
     </div>
 
     <div id="manage">
+      <div id="auth">
+        <p>
+          Want to add or manage hacks?  All you need is a <strong>mozilla.{org,com}</strong>,
+          email address.
+        </p>
+        <p>
+          Sign in to get started:
+          <span id="sign_in">
+            <img src="i/sign_in_blue.png" alt="BrowserID"></a>
+          </span>
+        </p>
+      </div>
+      <div id="control">
+      </div>
     </div>
 
   </body>
