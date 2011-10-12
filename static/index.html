@@ -2,71 +2,82 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>My Favorite Beer, a BrowserID example</title>
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link href='http://fonts.googleapis.com/css?family=Special+Elite&v1' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light&v1' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet/less" type="text/css" href="style.less">
-    <script src="js/less.js" type="text/javascript"></script>
+    <title>MozHacks.org - a directory of experiments by the mozilla community</title>
+    <link href="http://fonts.googleapis.com/css?family=Maiden+Orange" rel="stylesheet">
+<style>
+body {
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 0;
+  text-align: center;
+  -webkit-text-size-adjust: none;
+  text-align: center;
+  background: #333;
+  background: -webkit-gradient(radial, center top, 0, center top, 600, color-stop(0, #2A2E30), color-stop(1, #111414));
+  background: -webkit-radial-gradient(center top, circle closest-corner, #2A2E30, #111414);
+  background: -moz-radial-gradient(center top, circle closest-corner, #2A2E30, #111414);
+  background: -ms-radial-gradient(center top, circle closest-corner, #2A2E30, #111414);
+  background: -o-radial-gradient(center top, circle closest-corner, #2A2E30, #111414);
+  background: radial-gradient(center top, circle closest-corner, #2A2E30, #111414);
+  color: white;
+  font: 16px/19px Helvetica, Arial;
+  min-height: 100%;
+}
+
+#title {
+  font-size: 80px;
+  font-family: 'Maiden Orange', arial, sans-serif;
+  color: #fff;
+  margin-top: 1em;
+}
+
+#add_a_hack {
+  font-size: .8em;
+  margin-top : -2em;
+  float: right;
+  background: #333;
+  padding: 1em;
+  border-radius: .2em;
+  -moz-border-radius: .5em;
+  -webkit-border-radius: .5em;
+}
+
+#add_a_hack:hover {
+  background: #666;
+  cursor: pointer;
+}
+
+#list {
+  min-height: 200px;
+}
+
+#list img {
+  margin-top: 5em;
+}
+
+</style>
   </head>
   <body>
+    <h1 id="title">MozHacks.org</h1>
 
-    <header>
-      <div>
-        <h1 id="title">My Favorite Beer</h1>
-        <div class="picture"></div>
-        <div class="login"></div>
-      </div>
-    </header>
-
-    <div id="content">
+    <div id="overview">
+      <div id="add_a_hack">Add Hacks</div>
 
       <div class="intro">
-        <p>
-          <strong>MyFavoriteBeer.org</strong> helps you remember your own favorite beer 
-          <strong>in the cloud</strong>.  This is useful for times when you are in a bar and 
-          <strong>cannot remember</strong> what your <strong>favorite beer</strong> is.
-        </p>
-        <p>
-          To get started, sign in above!  This <em>awesome</em> service is 
-          <strong>totally free</strong>!
-        </p>
+        An <em>unofficial</em> directory of experiments, demos, and examples by the mozilla community.
       </div>
 
-      <div class="business" style="display: none;">
-        <p>
-          My Favorite Beer IS:
-        </p>
-        <p>
-          <input type="text">
-        </p>
-        <p>
-          (click ^^ to modify, &lt;enter&gt; saves)
-        </p>
+      <div id="list">
+        <img src="i/loader.gif">
       </div>
     </div>
 
-    <footer>
-      <div>
-        MyFavoriteBeer.org is a simple demo of how to use
-        <a href="https://browserid.org"><img src="i/browserid_logo_sm.png" alt="BrowserID"></a>
-        to build a snazzy passphraseless login flow.  You can refer to the
-        <a href="https://github.com/lloyd/myfavoritebeer.org/">source code</a> for
-        details.  (a <a href="http://mozillalabs.com">mozilla labs</a> thing).
-
-        <small>
-          (Thanks to <a href="http://www.flickr.com/photos/bitzi/236037776/">@bitzi for the photo</a>,
-          and the <a href="https://myfavouritesandwich.org">unhosted dudes for the concept</a>)
-        </small>
-
-      </div>
-    </footer>
+    <div id="manage">
+    </div>
 
   </body>
   <script src="https://browserid.org/include.js" type="text/javascript"></script>
   <script src="js/jquery.js" type="text/javascript"></script>
-  <script src="https://crypto-js.googlecode.com/files/2.2.0-crypto-md5.js" type="text/javascript"></script>
   <script src="js/main.js" type="text/javascript"></script>
 </html>
