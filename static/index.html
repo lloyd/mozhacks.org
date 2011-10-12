@@ -32,19 +32,36 @@ body {
   margin-top: 1em;
 }
 
-#add_a_hack {
-  font-size: .8em;
-  margin-top : -2em;
-  float: right;
-  background: #333;
-  padding: 1em;
-  border-radius: .2em;
+.rounded_box {
+  border-radius: .5em;
   -moz-border-radius: .5em;
   -webkit-border-radius: .5em;
+  font-size: .8em;
+  background: #333;
 }
 
-#add_a_hack:hover {
-  background: #666;
+#add_a_hack {
+  margin-top : -.5em;
+  float: right;
+}
+
+.button {
+  padding: .3em .5em .3em .5em;
+  background-color: #37A6FF;
+  border: 1px solid #37A6FF;
+  text-shadow: -1px -1px 0 #37A6FF;
+  cursor: pointer;
+  -webkit-box-shadow: 0 0 0 1px #76c2ff inset;
+  -moz-box-shadow: 0 0 0 1px #76c2ff inset;
+  -o-box-shadow: 0 0 0 1px #76c2ff inset;
+  box-shadow: 0 0 0 1px #76c2ff inset;
+  background-image: -moz-linear-gradient(center top,#76c2ff 0,#37a6ff 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#76c2ff),color-stop(100%,#37a6ff));
+  text-style: bold;
+}
+
+.button:hover {
+  opacity: .8;
   cursor: pointer;
 }
 
@@ -56,7 +73,7 @@ body {
   margin-top: 5em;
 }
 
-#manage {
+body > div {
   display: none;
 }
 
@@ -66,13 +83,59 @@ body {
   cursor: pointer;
 }
 
+#who_are_you {
+  float: right;
+  padding: .8em;
+  background: #666;
+}
+
+#who_are_you > img {
+  float: right;
+  margin-left: .5em;
+}
+
+a {
+  text-decoration: none;
+  border-bottom: 1px dashed white;
+  color: inherit;
+}
+
+h1 a {
+  border: none;
+}
+
+h1 a:hover {
+  opacity: .8;
+}
+
+#control {
+  text-align: left;
+}
+
+#control p {
+  margin-top: 3em;
+}
+
+#control div.button {
+  float: right;
+}
+
+#control table input {
+  color: #fff;
+  background: #000;
+  border: 1px solid white;
+  padding: .4em;
+  margin: .4em;
+  width: 90%;
+}
+
 </style>
   </head>
   <body>
-    <h1 id="title">MozHacks.org</h1>
+    <h1 id="title"><a href="/">MozHacks.org</a></h1>
 
     <div id="overview">
-      <div id="add_a_hack">Add Hacks</div>
+      <div id="add_a_hack" class="rounded_box button">Add Hacks</div>
 
       <div class="intro">
         An <em>unofficial</em> directory of experiments, demos, and examples by the mozilla community.
@@ -83,21 +146,30 @@ body {
       </div>
     </div>
 
-    <div id="manage">
-      <div id="auth">
-        <p>
-          Want to add or manage hacks?  All you need is a <strong>mozilla.{org,com}</strong>,
-          email address.
-        </p>
-        <p>
-          Sign in to get started:
-          <span id="sign_in">
-            <img src="i/sign_in_blue.png" alt="BrowserID"></a>
-          </span>
-        </p>
+    <div id="auth">
+      <p>
+        Want to add or manage hacks?  All you need is a <strong>mozilla.{org,com}</strong>,
+        email address.
+      </p>
+      <p>
+        Just <span id="sign_in" class="rounded_box button">sign in</span> to get started.
+      </p>
+    </div>
+
+    <div id="control">
+      <div id="who_are_you" class="rounded_box">
+        <img>
+        Welcome <span class="name"></span><br>
+        (<a href="#">logout</a>)
       </div>
-      <div id="control">
-      </div>
+      <h2> Manage Your Hacks </h2>
+      <p>
+        <div id="create_hack" class="button rounded_box">add hack</div>
+        You have <span id="num_hacks">0</span> hacks set up...
+      </p>
+      <table>
+        <tr> <th width="20%">name</th> <th width="70%"><em>short</em> description</th> <th width="10%">visible?</th> <th></th></tr>
+      </table>
     </div>
 
   </body>

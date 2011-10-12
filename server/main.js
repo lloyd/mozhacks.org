@@ -5,11 +5,11 @@ const
 express = require('express'),
 sessions = require('connect-cookie-session'),
 path = require('path'),
-postprocess = require('postprocess'),
-https = require('https'),
 querystring = require('querystring'),
 db = require('./db.js'),
-url = require('url');
+url = require('url'),
+hashlib = require('hashlib'),
+https = require('https');
 
 // the key with which session cookies are encrypted
 const COOKIE_SECRET = process.env.SEKRET || 'you love, i love, we all love beer!';
@@ -53,50 +53,29 @@ var cookieSession = sessions({
   }
 });
 
+const domain_whitelist = [
+  "mozilla.org",
+  "mozilla.com"
+];
+
 app.use(function (req, res, next) {
   if (/^\/api/.test(req.url)) return cookieSession(req, res, next);
   return next();
 });
 
-// The next three functions contain some fancy logic to make it so
-// we can run multiple different versions of myfavoritebeer on the
-// same server, each which uses a different browserid server
-// (dev/beta/prod):
-function determineEnvironment(req) {
-  if (req.headers['host'] === 'myfavoritebeer.org') return 'prod';
-  else if (req.headers['host'] === 'beta.myfavoritebeer.org') return 'beta';
-  else if (req.headers['host'] === 'dev.myfavoritebeer.org') return 'dev';
-  else return 'local';
+function identityResponse(email) {
+  return {
+    success: true,
+    email: email,
+    img: 'http://www.gravatar.com/avatar/' + hashlib.md5(email.trim().toLowerCase()) + "?s=32"
+  };
 }
-
-function determineBrowserIDURL(req) {
-  // first defer to the environment
-  if (process.env.BROWSERID_URL) return process.env.BROWSERID_URL;
-
-  return ({
-    prod:   'https://browserid.org',
-    beta:   'https://diresworb.org',
-    dev:    'https://dev.diresworb.org',
-    local:  'https://dev.diresworb.org'
-  })[determineEnvironment(req)];
-}
-
-function determineBrowserIDHost(req) {
-  return determineBrowserIDURL(req).replace(/http(s?):\/\//, '');
-}
-
-// a substitution middleware allows us to easily point at different browserid servers
-app.use(postprocess.middleware(function(req, body) {
-  var browseridURL = determineBrowserIDURL(req);
-  return body.toString().replace(new RegExp("https://browserid.org", 'g'), browseridURL);
-}));
-
 
 // /api/whoami is an API that returns the authentication status of the current session.
 // it returns a JSON encoded string containing the currently authenticated user's email
 // if someone is logged in, otherwise it returns null.
 app.get("/api/whoami", function (req, res) {
-  if (req.session && typeof req.session.email === 'string') return res.json(req.session.email);
+  if (req.session && typeof req.session.email === 'string') return res.json(identityResponse(req.session.email));
   return res.json(null);
 });
 
@@ -111,7 +90,7 @@ app.post("/api/login", function (req, res) {
   // If we didn't want to rely on this service, it's possible to implement verification
   // in a library and to do it ourselves.  
   var vreq = https.request({
-    host: determineBrowserIDHost(req),
+    host: 'browserid.org',
     path: "/verify",
     method: 'POST'
   }, function(vres) {
@@ -122,17 +101,44 @@ app.post("/api/login", function (req, res) {
             var verifierResp = JSON.parse(body);
             var valid = verifierResp && verifierResp.status === "okay";
             var email = valid ? verifierResp.email : null;
-            req.session.email = email;
+            var reason;
             if (valid) {
               console.log("assertion verified successfully for email:", email);
             } else {
               console.log("failed to verify assertion:", verifierResp.reason);
-            }                
-            res.json(email);
+            }
+            if (!valid) throw "verifier can't validate!";
+
+            var whitelisted = false;
+            domain_whitelist.forEach(function(domain) {
+              console.log("testing", email, "against", domain);
+              if (email.substr(-domain.length) === domain) {
+                whitelisted = true;
+              }
+            });
+            if (!whitelisted) {
+              valid = false;
+              reason = "you must use an email address in one of the following domains: " +
+                domain_whitelist.join(", ");;
+            }
+
+            if (valid) {
+              // set up the session!
+              req.session.email = email;
+              res.json(identityResponse(email));
+            } else {
+              res.json({
+                success: false,
+                reason: reason
+              });
+            }
           } catch(e) {
             console.log("non-JSON response from verifier");
             // bogus response from verifier!  return null
-            res.json(null);
+            res.json({
+              success: false,
+              reason: "internal error verifying your identity"
+            });
           }
         });
   });
