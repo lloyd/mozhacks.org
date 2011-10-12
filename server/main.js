@@ -48,7 +48,7 @@ var cookieSession = sessions({
     path: '/api',
     httpOnly: true,
     // when you're logged in, you're logged in for an hour
-    maxAge: (1 * 60 * 60 * 1000), 
+    maxAge: (1 * 60 * 60 * 1000),
     secure: false
   }
 });
@@ -171,9 +171,10 @@ function checkAuth(req, res, next) {
 
   if (!email) {
     res.writeHead(400, {"Content-Type": "text/plain"});
-    res.write("Bad Request: you must be authenticated to call this API");
-    res.end();
-    return;
+    return res.json({
+      sucess: false,
+      reason: "You must be authenticated to call this API"
+    });
   }
 
   next();
@@ -182,7 +183,10 @@ function checkAuth(req, res, next) {
 function checkDB(req, res, next) {
   if (!havePersistence) {
     console.log("WARNING: get is a no-op!  we have no database configured");
-    return res.json("no database");
+    return res.json({
+      sucess: false,
+      reason: "No database is configured"
+    });
   }
   next();
 }
