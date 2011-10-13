@@ -3,7 +3,8 @@
 
 const
 url = require('url'),
-mongodb = require('mongodb');
+mongodb = require('mongodb'),
+hashlib = require('hashlib');
 
 var collection;
 
@@ -27,7 +28,7 @@ exports.connect = function(cb) {
   });
 };
 
-exports.save = function(email, subdomain, cname, desc, viz, cb) {
+exports.save = function(email, subdomain, url, desc, viz, cb) {
   // does it exist?
   collection.findOne({ email: email, name: subdomain }, function (err, rez) {
     if (err) return cb(err);
@@ -38,7 +39,7 @@ exports.save = function(email, subdomain, cname, desc, viz, cb) {
         name: subdomain
       }, {
         '$set': {
-          cname: cname,
+          url: url,
           desc: desc,
           viz: viz
         }
@@ -50,7 +51,7 @@ exports.save = function(email, subdomain, cname, desc, viz, cb) {
       collection.insert({
         email: email,
         name: subdomain,
-        cname: cname,
+        url: url,
         desc: desc,
         viz: viz
       }, function (err, docs) {
@@ -64,3 +65,21 @@ exports.save = function(email, subdomain, cname, desc, viz, cb) {
 exports.hacksForEmail = function(email, cb) {
   collection.find({email:email}).toArray(cb);
 };
+
+exports.visibleHacks = function(cb) {
+  collection.find({viz:true}).toArray(function (err, arr) {
+    if (err) return cb(err);
+    cb(undefined, arr.map(function(e) {
+      delete e._id;
+      delete e.viz;
+      e.email = hashlib.md5(e.email.trim().toLowerCase());
+      return e;
+    }));
+  });
+};
+
+exports.delete = function(email, name, cb) {
+  collection.remove({email: email, name:name}, function (err, results) {
+    cb(err);
+  });
+}

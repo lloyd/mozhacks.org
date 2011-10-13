@@ -43,10 +43,10 @@ function gotVerifiedEmail(assertion) {
   }
 }
 
-function buildEditableRow(name, cname, desc, viz) {
+function buildEditableRow(name, url, desc, viz) {
   return $("<tr class='editable'/>")
     .append($("<td/>").append($("<input class='name'/>").val(name)))
-    .append($("<td/>").append($("<input class='host'/>").val(cname)))
+    .append($("<td/>").append($("<input class='url'/>").val(url)))
     .append($("<td/>").append($("<input class='desc'/>").val(desc)))
     .append("<td><input class='viz' type='checkbox'" +
             (viz ? " CHECKED" : "") + "></td>")
@@ -54,10 +54,11 @@ function buildEditableRow(name, cname, desc, viz) {
 }
 
 
-function buildRow(name, cname, desc, viz) {
+function buildRow(name, url, desc, viz) {
+  if (name === undefined) name = "";
   return $("<tr class='static'/>")
     .append("<td class='name'>" + name + "</td>")
-    .append("<td class='host'>" + cname + "</td>")
+    .append("<td class='url'>" + url + "</td>")
     .append("<td class='desc'>" + desc + "</td>")
     .append("<td class='viz'>" + viz + "</td>")
     .append("<td><div class='button rounded_box'>edit</div><div class='button rounded_box'>delete</div></td></tr>");
@@ -80,7 +81,7 @@ function updateMyHacks() {
           for (var i = 0; i < res.hacks.length; i++) {
             buildRow(
               res.hacks[i].name,
-              res.hacks[i].cname,
+              res.hacks[i].url,
               res.hacks[i].desc,
               res.hacks[i].viz).appendTo("#control table");
           }
@@ -94,18 +95,47 @@ function updateMyHacks() {
     });
 }
 
+function updateHacks() {
+  function createEntry(obj) {
+    var node = $("<div class='hack'><div class='who'><img></div><a><h3 class='name'/><div class='desc'/></a></div>");
+    node.find(".name").text(obj.name);
+    node.find(".desc").text(obj.desc);
+    node.find(".who img").attr('src', 'http://www.gravatar.com/avatar/' + obj.email + "?s=48");
+    node.find("a").attr('href', obj.url);
+    return node;
+  }
+
+  $.ajax({
+    type: 'GET',
+    url: '/api/list',
+    success: function(res, status, xhr) {
+      if (!res.success) {
+        alert("error listing hacks: " + res.reason);
+      } else {
+        $("#list > *").remove();
+        for(var i = 0; i < res.hacks.length; i++) {
+          $("#list").append(createEntry(res.hacks[i]));
+        }
+      }
+    },
+    error: function(res, status, xhr) {
+      alert("error listing hacks: " + res.reason);
+    }
+  });
+}
+
 function extractDataFromRow(row) {
   if (row.hasClass('editable')) {
     return {
       name: row.find(".name").val(),
-      host: row.find(".host").val(),
+      url: row.find(".url").val(),
       desc: row.find(".desc").val(),
       viz:  row.find(".viz").attr('checked') ? true : false
     };
   } else {
     return {
       name: row.find(".name").text(),
-      host: row.find(".host").text(),
+      url: row.find(".url").text(),
       desc: row.find(".desc").text(),
       viz:  JSON.parse(row.find(".viz").text())
     };
@@ -134,12 +164,29 @@ function manipulateRecord() {
     });
   } else if ($(this).text() === 'delete') {
     // user is trying to delete a record
+    var name = extractDataFromRow($(this).parent().parent()).name;
+
+    $.ajax({
+      type: 'POST',
+      url: '/api/delete',
+      data: { name: name },
+      success: function(res, status, xhr) {
+        if (!res.success) {
+          alert("couldn't delete record: " + res.reason);
+        } else {
+          updateMyHacks();
+        }
+      },
+      error: function(res, status, xhr) {
+        alert("failed to delete record: " + res.reason);
+      }
+    });
+
   } else if ($(this).text() === 'edit') {
     // user is trying to edit a record
     var row = $(this).parent().parent();
     var data = extractDataFromRow(row);
-    row.replaceWith(buildEditableRow(data.name, data.host,
-                                     data.desc, data.viz));
+    row.replaceWith(buildEditableRow(data.name, data.url, data.desc, data.viz));
     rebindButtons();
   }
 }
@@ -191,5 +238,6 @@ $(document).ready(function() {
     displayManage();
   } else {
     $("#overview").fadeIn(400);
+    updateHacks();
   }
 });

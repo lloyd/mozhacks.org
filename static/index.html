@@ -25,11 +25,24 @@ body {
   min-height: 100%;
 }
 
+#overview .intro {
+  margin-bottom: 2em;
+}
+
 #title {
   font-size: 80px;
-  font-family: 'Maiden Orange', arial, sans-serif;
   color: #fff;
   margin-top: 1em;
+}
+
+#title, h1, h2, h3 {
+  font-family: 'Maiden Orange', arial, sans-serif;
+}
+
+.hack .desc {
+  margin: auto;
+  max-width: 50%;
+  float: left;
 }
 
 .rounded_box {
@@ -38,6 +51,63 @@ body {
   -webkit-border-radius: .5em;
   font-size: .8em;
   background: #333;
+}
+
+.hack a {
+  height: 60px;
+  -moz-border-radius: 25px;
+  -webkit-border-radius: 25px;
+  border-radius: 25px;
+  margin: 0 0 10px 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  padding: 20px;
+  text-overflow: ellipsis;
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 20px;
+  border-bottom: none;
+}
+
+.hack a {
+  background: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 50.01%, rgba(255, 255, 255, 0)), -webkit-linear-gradient(#0074AE, #073C66);
+  background: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 50.01%, rgba(255, 255, 255, 0)), -moz-linear-gradient(#0074AE, #073C66);
+  background: -ms-linear-gradient(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 50.01%, rgba(255, 255, 255, 0)), -ms-linear-gradient(#0074AE, #073C66);
+  background: -o-linear-gradient(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 50.01%, rgba(255, 255, 255, 0)), -o-linear-gradient(#0074AE, #073C66);
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 50.01%, rgba(255, 255, 255, 0)), linear-gradient(#0074AE, #073C66);
+  -webkit-border-radius: 25px;
+  border-radius: 25px;
+  margin: 0 0 10px 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  padding: 20px;
+  text-overflow: ellipsis;
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 20px;
+}
+
+.hack h3 {
+  float: left;
+  margin: 0 30px 0 0;
+  border-right: 1px solid rgba(255, 255, 255, 1.0);
+  padding: 0 20px 0 0;
+  height: 60px;
+  line-height: 66px;
+  font-size: 45px;
+}
+
+.hack .who {
+  float: right;
+  margin-top: -52px;
+  margin-right: 20px;;
+  height: 48px;
+  width: 48px;
+
 }
 
 #add_a_hack {
@@ -181,7 +251,7 @@ h1 a:hover {
         You have <span id="num_hacks">0</span> hacks set up...
       </p>
       <table>
-        <tr> <th width="15%">name</th> <th width="15%">host (CNAME)</th> <th width="50%"><em>short</em> description</th> <th width="10%">visible?</th> <th width="30%">modify</th></tr>
+        <tr> <th width="15%">name</th> <th width="15%">url</th> <th width="50%"><em>short</em> description</th> <th width="10%">visible?</th> <th width="30%">modify</th></tr>
       </table>
     </div>
 

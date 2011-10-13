@@ -80,7 +80,7 @@ app.get("/api/whoami", function (req, res) {
 });
 
 
-// /api/login is an API which authenticates the current session.  The client includes 
+// /api/login is an API which authenticates the current session.  The client includes
 // an assertion in the post body (returned by browserid's navigator.id.getVerifiedEmail()).
 // if the assertion is valid an (encrypted) cookie is set to start the user's session.
 // returns a json encoded email if the session is successfully authenticated, otherwise
@@ -88,7 +88,7 @@ app.get("/api/whoami", function (req, res) {
 app.post("/api/login", function (req, res) {
   // To verify the assertion we initiate a POST request to the browserid verifier service.
   // If we didn't want to rely on this service, it's possible to implement verification
-  // in a library and to do it ourselves.  
+  // in a library and to do it ourselves.
   var vreq = https.request({
     host: 'browserid.org',
     path: "/verify",
@@ -147,7 +147,7 @@ app.post("/api/login", function (req, res) {
   // An "audience" argument is embedded in the assertion and must match our hostname.
   // Because this one server runs on multiple different domain names we just use
   // the host parameter out of the request.
-  var audience = req.headers['host'] ? req.headers['host'] : localHostname;   
+  var audience = req.headers['host'] ? req.headers['host'] : localHostname;
   var data = querystring.stringify({
     assertion: req.body.assertion,
     audience: audience
@@ -199,14 +199,13 @@ function checkDB(req, res, next) {
 app.post("/api/save", checkAuth, checkDB, function (req, res) {
   // input validation!
   try {
-    [ "host", "name", "desc"].forEach(function(key) {
+    [ "url", "name", "desc"].forEach(function(key) {
       if (typeof req.body[key] != 'string') throw "'"+key+"' <string> POST arg required";
     });
-    if (req.body.host.length <= 0) throw "non-empty host required";
+    if (req.body.url.length <= 0) throw "non-empty url required";
     if (req.body.name.length <= 0) throw "non-empty name required";
     if (req.body.name.length > 63) throw "name too long";
     if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(req.body.name)) throw "invalid name!  must be a valid subdomain";
-    req.body.host = req.body.host.toLowerCase();
     if (typeof req.body.viz != 'string' ||
         (req.body.viz !== 'true' && req.body.viz !== 'false') ) throw "'viz' <boolean> POST arg required";
     req.body.viz = JSON.parse(req.body.viz);
@@ -218,7 +217,7 @@ app.post("/api/save", checkAuth, checkDB, function (req, res) {
   }
 
   // input appears to be valid, may the current user update the record?
-  db.save(req.session.email, req.body.name, req.body.host, req.body.desc, req.body.viz, function(err) {
+  db.save(req.session.email, req.body.name, req.body.url, req.body.desc, req.body.viz, function(err) {
     if (err) {
       return res.json({
         success: false,
@@ -231,16 +230,24 @@ app.post("/api/save", checkAuth, checkDB, function (req, res) {
 });
 
 app.post("/api/delete", checkAuth, checkDB, function (req, res) {
-  res.json({
-    success: false,
-    reason: "not implemented"
-  });
-});
-
-app.post("/api/list", checkAuth, checkDB, function (req, res) {
-  res.json({
-    success: false,
-    reason: "not implemented"
+  // input validation!
+  if (typeof req.body.name !== 'string') {
+    return res.json({
+      success: false,
+      reason: "missing hack name to delete"
+    });
+  }
+  db.delete(req.session.email, req.body.name, function (err, cb) {
+    if (err) {
+      res.json({
+        success: false,
+        reason: err
+      });
+    } else {
+      res.json({
+        success: true,
+      });
+    }
   });
 });
 
@@ -249,7 +256,23 @@ app.post("/api/mine", checkAuth, checkDB, function (req, res) {
     if (err) {
       res.json({
         success: false,
-        reason: "not implemented"
+        reason: err
+      });
+    } else {
+      res.json({
+        success: true,
+        hacks: r
+      });
+    }
+  });
+});
+
+app.get("/api/list", checkDB, function (req, res) {
+  db.visibleHacks(function(err, r) {
+    if (err) {
+      res.json({
+        success: false,
+        reason: err
       });
     } else {
       res.json({
