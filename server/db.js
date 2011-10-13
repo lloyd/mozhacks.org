@@ -1,19 +1,11 @@
-// db.js is a tiny persistence layer for myfavoritebeer that uses
+// db.js is a tiny persistence layer for mozhacks that uses
 // mongodb and the mongodb client library.
-//
-// This implementation is really not the point of the myfavoritebeer
-// example code and is just provided for completeness (the point is
-// how you can do authentication with browserid).  
 
 const
 url = require('url'),
 mongodb = require('mongodb');
 
-var collections = {
-  dev:  undefined,
-  beta: undefined,
-  prod: undefined
-};
+var collection;
 
 exports.connect = function(cb) {
   if (!process.env.MONGOLAB_URI) {
@@ -25,10 +17,7 @@ exports.connect = function(cb) {
   var server = new mongodb.Server(bits.hostname, bits.port, {});
   new mongodb.Db(bits.pathname.substr(1), server, {}).open(function (err, cli) {
     if (err) return cb(err);
-    collections.dev = new mongodb.Collection(cli, 'devbeers');
-    collections.local = collections.dev;
-    collections.beta = new mongodb.Collection(cli, 'betabeers');
-    collections.prod = new mongodb.Collection(cli, 'prodbeers');
+    collection = new mongodb.Collection(cli, 'mozhacks');
 
     // now authenticate
     var auth = bits.auth.split(':');
@@ -36,26 +25,38 @@ exports.connect = function(cb) {
       cb(err);
     });
   });
-}; 
-
-exports.get = function(collection, email, cb) {
-  var c = collections[collection].find({ email: email }, { beer: 1 });
-  c.toArray(function(err, docs) {
-    if (err) return cb(err);
-    if (docs.length != 1) return cb("consistency error!  more than one doc returned!");
-    cb(undefined, docs[0].beer);
-  });
 };
 
-exports.set = function(collection, email, beer, cb) {
-  collections[collection].update(
-    { email: email },
-    {
-      email: email,
-      beer: beer
-    },
-    {
-      safe:true,
-      upsert: true
-    }, cb);
+exports.save = function(email, host, cname, desc, viz, cb) {
+  // does it exist?
+  collection.findOne({ email: email, host: host }, function (err, rez) {
+    if (err) return cb(err);
+    if (rez) {
+      if (email !== rez.email) return cb("'" + rez.name + "' is already taken by someone who is not you");
+      collection.update({
+        email: email,
+        host: host
+      }, {
+        '$set': {
+          cname: cname,
+          desc: desc,
+          viz: viz
+        }
+      }, function (err, docs) {
+        cb(err);
+      });
+    } else {
+      // insert
+      collection.insert({
+        email: email,
+        host: host,
+        cname: cname,
+        desc: desc,
+        viz: viz
+      }, function (err, docs) {
+        console.log(err, docs);
+        cb(err);
+      });
+    }
+  });
 };

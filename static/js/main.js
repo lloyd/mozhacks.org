@@ -56,7 +56,7 @@ function manipulateRecord() {
       desc: row.find("input.desc").val(),
       viz:  row.find("input.viz").attr('checked') ? true : false
     };
-    
+
     $.ajax({
       type: 'POST',
       url: '/api/save',

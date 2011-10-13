@@ -171,10 +171,12 @@ function checkAuth(req, res, next) {
 
   if (!email) {
     res.writeHead(400, {"Content-Type": "text/plain"});
-    return res.json({
+    res.write(JSON.stringify({
       sucess: false,
       reason: "You must be authenticated to call this API"
-    });
+    }));
+    res.end();
+    return;
   }
 
   next();
@@ -182,7 +184,7 @@ function checkAuth(req, res, next) {
 
 function checkDB(req, res, next) {
   if (!havePersistence) {
-    console.log("WARNING: get is a no-op!  we have no database configured");
+    console.log("WARNING: no-op!  we have no database configured");
     return res.json({
       sucess: false,
       reason: "No database is configured"
@@ -195,46 +197,50 @@ function checkDB(req, res, next) {
 // /api/get requires an authenticated session, and accesses the current user's favorite
 // beer out of the database.
 app.post("/api/save", checkAuth, checkDB, function (req, res) {
+  // input validation!
+  try {
+    [ "host", "name", "desc"].forEach(function(key) {
+      if (typeof req.body[key] != 'string') throw "'"+key+"' <string> POST arg required";
+    });
+    if (req.body.name.length <= 0) throw "non-empty name required";
+    if (req.body.host.length <= 0) throw "non-empty host required";
+    if (req.body.host.length > 63) throw "host name too long";
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(req.body.host)) throw "invalid host name";
+    req.body.host = req.body.host.toLowerCase();
+    if (typeof req.body.viz != 'string' ||
+        (req.body.viz !== 'true' && req.body.viz !== 'false') ) throw "'viz' <boolean> POST arg required";
+    req.body.viz = JSON.parse(req.body.viz);
+  } catch(e) {
+    return res.json({
+      success: false,
+      reason: e.toString()
+    });
+  }
+
+  // input appears to be valid, may the current user update the record?
+  db.save(req.session.email, req.body.host, req.body.name, req.body.desc, req.body.viz, function(err) {
+    if (err) {
+      return res.json({
+        success: false,
+        reason: "you may not save '" + req.body.name + "' - " + err
+      });
+    }
+
+    return res.json({ success: true });
+  });
+});
+
+app.post("/api/delete", checkAuth, checkDB, function (req, res) {
   res.json({
     success: false,
     reason: "not implemented"
   });
 });
 
-// /api/set requires an authenticated session, and sets the current user's favorite
-// beer in the database.
-app.post("/api/set", function (req, res) {
-  var email = req.session.email;
-
-  if (!email) {
-    resp.writeHead(400, {"Content-Type": "text/plain"});
-    resp.write("Bad Request: you must be authenticated to get your beer");
-    resp.end();
-    return;
-  }
-
-  var beer = req.body.beer;
-
-  if (!beer) {
-    resp.writeHead(400, {"Content-Type": "text/plain"});
-    resp.write("Bad Request: a 'beer' parameter is required to set your favorite beer");
-    resp.end();
-    return;
-  }
-
-  if (!havePersistence) {
-    console.log("WARNING: set is a no-op!  we have no database configured");
-    return res.json(true);
-  }
-
-  db.set(determineEnvironment(req), email, beer, function(err) {
-    if (err) {
-      console.log("setting beer for", email, "to", beer); 
-      res.writeHead(500);
-      res.end();
-    } else {
-      res.json(true);
-    }
+app.post("/api/list", checkAuth, checkDB, function (req, res) {
+  res.json({
+    success: false,
+    reason: "not implemented"
   });
 });
 
