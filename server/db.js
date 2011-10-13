@@ -62,6 +62,13 @@ exports.save = function(email, subdomain, url, desc, viz, cb) {
   });
 };
 
+exports.nameToLink = function(name, cb) {
+  collection.findOne({ name: name }, function (err, rez) {
+    if (err || !rez || !rez.url) cb(undefined);
+    else cb(rez.url);
+  });
+};
+
 exports.hacksForEmail = function(email, cb) {
   collection.find({email:email}).toArray(cb);
 };

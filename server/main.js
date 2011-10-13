@@ -34,6 +34,29 @@ var havePersistence;
 // do some logging
 app.use(express.logger({ format: 'dev' }));
 
+// perform redirection
+app.use(function(req, resp, next) {
+  var who = req.headers['host'];
+  console.log(who);
+  if (!who) return next();
+  if (/^(127.0.0.1|localhost)/.test(who)) return next();
+  if (who === 'mozhacks.org') return next();
+  // extract the name
+  var name = who.substr(who.indexOf('.'));
+  console.log("trying to redirect:", name);
+  db.nameToLink(function(link) {
+    if (link) {
+      resp.writeHead(302, {
+        'Location': link
+      });
+      resp.end();
+    } else {
+      resp.writeHead(404);
+      resp.end();
+    }
+  });
+});
+
 // parse cookies
 app.use(express.cookieParser());
 
