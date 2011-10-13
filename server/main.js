@@ -44,7 +44,7 @@ app.use(function(req, resp, next) {
   // extract the name
   var name = who.substr(0, who.indexOf('.'));
   console.log("trying to redirect:", name);
-  db.nameToLink(function(link) {
+  db.nameToLink(name, function(link) {
     if (link) {
       resp.writeHead(302, {
         'Location': link
