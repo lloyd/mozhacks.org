@@ -202,10 +202,10 @@ app.post("/api/save", checkAuth, checkDB, function (req, res) {
     [ "host", "name", "desc"].forEach(function(key) {
       if (typeof req.body[key] != 'string') throw "'"+key+"' <string> POST arg required";
     });
-    if (req.body.name.length <= 0) throw "non-empty name required";
     if (req.body.host.length <= 0) throw "non-empty host required";
-    if (req.body.host.length > 63) throw "host name too long";
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(req.body.host)) throw "invalid host name";
+    if (req.body.name.length <= 0) throw "non-empty name required";
+    if (req.body.name.length > 63) throw "name too long";
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(req.body.name)) throw "invalid name!  must be a valid subdomain";
     req.body.host = req.body.host.toLowerCase();
     if (typeof req.body.viz != 'string' ||
         (req.body.viz !== 'true' && req.body.viz !== 'false') ) throw "'viz' <boolean> POST arg required";
@@ -218,7 +218,7 @@ app.post("/api/save", checkAuth, checkDB, function (req, res) {
   }
 
   // input appears to be valid, may the current user update the record?
-  db.save(req.session.email, req.body.host, req.body.name, req.body.desc, req.body.viz, function(err) {
+  db.save(req.session.email, req.body.name, req.body.host, req.body.desc, req.body.viz, function(err) {
     if (err) {
       return res.json({
         success: false,
@@ -241,6 +241,22 @@ app.post("/api/list", checkAuth, checkDB, function (req, res) {
   res.json({
     success: false,
     reason: "not implemented"
+  });
+});
+
+app.post("/api/mine", checkAuth, checkDB, function (req, res) {
+  db.hacksForEmail(req.session.email, function(err, r) {
+    if (err) {
+      res.json({
+        success: false,
+        reason: "not implemented"
+      });
+    } else {
+      res.json({
+        success: true,
+        hacks: r
+      });
+    }
   });
 });
 

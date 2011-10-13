@@ -27,15 +27,15 @@ exports.connect = function(cb) {
   });
 };
 
-exports.save = function(email, host, cname, desc, viz, cb) {
+exports.save = function(email, subdomain, cname, desc, viz, cb) {
   // does it exist?
-  collection.findOne({ email: email, host: host }, function (err, rez) {
+  collection.findOne({ email: email, name: subdomain }, function (err, rez) {
     if (err) return cb(err);
     if (rez) {
       if (email !== rez.email) return cb("'" + rez.name + "' is already taken by someone who is not you");
       collection.update({
         email: email,
-        host: host
+        name: subdomain
       }, {
         '$set': {
           cname: cname,
@@ -49,7 +49,7 @@ exports.save = function(email, host, cname, desc, viz, cb) {
       // insert
       collection.insert({
         email: email,
-        host: host,
+        name: subdomain,
         cname: cname,
         desc: desc,
         viz: viz
@@ -59,4 +59,8 @@ exports.save = function(email, host, cname, desc, viz, cb) {
       });
     }
   });
+};
+
+exports.hacksForEmail = function(email, cb) {
+  collection.find({email:email}).toArray(cb);
 };

@@ -16,6 +16,7 @@ function showControl(email) {
   $("#control").fadeIn(400);
   $("#control .name").text(email.substr(0, email.indexOf('@')));
   window.location.hash = "#manage";
+  updateMyHacks();
 }
 
 // a handler that is passed an assertion after the user logs in via the
@@ -42,8 +43,31 @@ function gotVerifiedEmail(assertion) {
   }
 }
 
-function convertToSaved(row) {
-  alert("converting row to saved");
+function updateMyHacks() {
+  $("#control table tr:not(:first-child)").remove();
+    $.ajax({
+      type: 'POST',
+      url: '/api/mine',
+      success: function(res, status, xhr) {
+        if (!res.success) {
+          alert("error listing your hacks: " + res.reason);
+        } else {
+          for (var i = 0; i < res.hacks.length; i++) {
+            $("<tr>" +
+              "<td>" + res.hacks[i].name + "</td>" +
+              "<td>" + res.hacks[i].cname + "</td>" +
+              "<td>" + res.hacks[i].desc + "</td>" +
+              "<td>" + res.hacks[i].viz + "</td>" +
+              "<td><div class='button rounded_box'>edit</div><div class='button rounded_box'>delete</div></td></tr>")
+              .appendTo("#control table");
+          }
+        }
+      },
+      error: function(res, status, xhr) {
+        alert("error listing your hacks: " + res.reason);
+      }
+
+    });
 }
 
 function manipulateRecord() {
@@ -65,7 +89,7 @@ function manipulateRecord() {
         if (!res.success) {
           alert("couldn't save record: " + res.reason);
         } else {
-          convertToSaved(row);
+          updateMyHacks();
         }
       },
       error: function(res, status, xhr) {
@@ -76,7 +100,7 @@ function manipulateRecord() {
     // user is trying to delete a record
   } else if ($(this).text() === 'edit') {
     // user is trying to edit a record
-  }    
+  }
 }
 
 // at startup let's check to see whether we're authenticated to
