@@ -58,11 +58,24 @@ body {
   background-image: -moz-linear-gradient(center top,#76c2ff 0,#37a6ff 100%);
   background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#76c2ff),color-stop(100%,#37a6ff));
   text-style: bold;
+  opacity: .8;
 }
 
 .button:hover {
-  opacity: .8;
+  opacity: 1;
   cursor: pointer;
+}
+
+#control table td {
+  font-size: .8em;
+}
+
+#control table tr {
+  row-spacing: 1em;
+}
+
+#control table .button {
+  margin-right: .1em;
 }
 
 #list {
@@ -168,7 +181,7 @@ h1 a:hover {
         You have <span id="num_hacks">0</span> hacks set up...
       </p>
       <table>
-        <tr> <th width="15%">name</th> <th width="15%">host (CNAME)</th> <th width="60%"><em>short</em> description</th> <th width="10%">visible?</th> <th></th></tr>
+        <tr> <th width="15%">name</th> <th width="15%">host (CNAME)</th> <th width="50%"><em>short</em> description</th> <th width="10%">visible?</th> <th width="30%">modify</th></tr>
       </table>
     </div>
 

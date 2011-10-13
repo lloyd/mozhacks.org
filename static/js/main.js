@@ -43,6 +43,31 @@ function gotVerifiedEmail(assertion) {
   }
 }
 
+function buildEditableRow(name, cname, desc, viz) {
+  return $("<tr class='editable'/>")
+    .append($("<td/>").append($("<input class='name'/>").val(name)))
+    .append($("<td/>").append($("<input class='host'/>").val(cname)))
+    .append($("<td/>").append($("<input class='desc'/>").val(desc)))
+    .append("<td><input class='viz' type='checkbox'" +
+            (viz ? " CHECKED" : "") + "></td>")
+    .append("<td><div class='button rounded_box'>save</div></td>");
+}
+
+
+function buildRow(name, cname, desc, viz) {
+  return $("<tr class='static'/>")
+    .append("<td class='name'>" + name + "</td>")
+    .append("<td class='host'>" + cname + "</td>")
+    .append("<td class='desc'>" + desc + "</td>")
+    .append("<td class='viz'>" + viz + "</td>")
+    .append("<td><div class='button rounded_box'>edit</div><div class='button rounded_box'>delete</div></td></tr>");
+}
+
+function rebindButtons() {
+  $("#control table div.button").unbind();
+  $("#control table div.button").click(manipulateRecord);
+}
+
 function updateMyHacks() {
   $("#control table tr:not(:first-child)").remove();
     $.ajax({
@@ -53,14 +78,13 @@ function updateMyHacks() {
           alert("error listing your hacks: " + res.reason);
         } else {
           for (var i = 0; i < res.hacks.length; i++) {
-            $("<tr>" +
-              "<td>" + res.hacks[i].name + "</td>" +
-              "<td>" + res.hacks[i].cname + "</td>" +
-              "<td>" + res.hacks[i].desc + "</td>" +
-              "<td>" + res.hacks[i].viz + "</td>" +
-              "<td><div class='button rounded_box'>edit</div><div class='button rounded_box'>delete</div></td></tr>")
-              .appendTo("#control table");
+            buildRow(
+              res.hacks[i].name,
+              res.hacks[i].cname,
+              res.hacks[i].desc,
+              res.hacks[i].viz).appendTo("#control table");
           }
+          rebindButtons();
         }
       },
       error: function(res, status, xhr) {
@@ -70,21 +94,33 @@ function updateMyHacks() {
     });
 }
 
+function extractDataFromRow(row) {
+  if (row.hasClass('editable')) {
+    return {
+      name: row.find(".name").val(),
+      host: row.find(".host").val(),
+      desc: row.find(".desc").val(),
+      viz:  row.find(".viz").attr('checked') ? true : false
+    };
+  } else {
+    return {
+      name: row.find(".name").text(),
+      host: row.find(".host").text(),
+      desc: row.find(".desc").text(),
+      viz:  JSON.parse(row.find(".viz").text())
+    };
+  }
+}
+
 function manipulateRecord() {
   if ($(this).text() === 'save') {
     // user is trying to save a record (new or existing)
     var row = $(this).parent().parent();
-    var data = {
-      name: row.find("input.name").val(),
-      host: row.find("input.host").val(),
-      desc: row.find("input.desc").val(),
-      viz:  row.find("input.viz").attr('checked') ? true : false
-    };
 
     $.ajax({
       type: 'POST',
       url: '/api/save',
-      data: data,
+      data: extractDataFromRow(row),
       success: function(res, status, xhr) {
         if (!res.success) {
           alert("couldn't save record: " + res.reason);
@@ -100,6 +136,11 @@ function manipulateRecord() {
     // user is trying to delete a record
   } else if ($(this).text() === 'edit') {
     // user is trying to edit a record
+    var row = $(this).parent().parent();
+    var data = extractDataFromRow(row);
+    row.replaceWith(buildEditableRow(data.name, data.host,
+                                     data.desc, data.viz));
+    rebindButtons();
   }
 }
 
@@ -138,16 +179,9 @@ $(document).ready(function() {
 
   // when the user clicks 'create hack'...
   $("#create_hack").click(function() {
-    $("<tr>" +
-      "<td><input class='name'/></td>" +
-      "<td><input class='host'/></td>" +
-      "<td><input class='desc'></input></td>" +
-      "<td><input class='viz' type='checkbox'></td><td>" +
-      "<div class='button rounded_box'>save</div></td></tr>")
-      .appendTo("#control table");
+    buildEditableRow("", "", "", true).appendTo("#control table");
     // re-bind all existing buttons
-    $("#control table div.button").unbind();
-    $("#control table div.button").click(manipulateRecord);
+    rebindButtons();
   });
 
   // basic routing
