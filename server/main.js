@@ -42,7 +42,7 @@ app.use(function(req, resp, next) {
   if (/^(127.0.0.1|localhost)/.test(who)) return next();
   if (who === 'mozhacks.org') return next();
   // extract the name
-  var name = who.substr(who.indexOf('.'));
+  var name = who.substr(0, who.indexOf('.'));
   console.log("trying to redirect:", name);
   db.nameToLink(function(link) {
     if (link) {
