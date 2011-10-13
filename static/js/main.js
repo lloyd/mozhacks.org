@@ -165,7 +165,7 @@ $(document).ready(function() {
   });
 
   // when the user clicks logout...
-  $("#who_are_you a").click(function() {
+  $("#who_are_you a").click(function(event) {
     event.preventDefault();
     $.ajax({
       type: 'POST',
