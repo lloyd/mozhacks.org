@@ -117,7 +117,7 @@ function updateHacks() {
           res.hacks[i].x = Math.random() * 100;
         }
         res.hacks.sort(function(a,b) {
-          return a.x > b.x;
+          return a.x > b.x ? 1 : -1;
         });
 
         $("#list > *").remove();
