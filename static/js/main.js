@@ -112,6 +112,14 @@ function updateHacks() {
       if (!res.success) {
         alert("error listing hacks: " + res.reason);
       } else {
+        // shuffle the array
+        for(var i = 0; i < res.hacks.length; i++) {
+          res.hacks[i].x = Math.random() * 100;
+        }
+        res.hacks.sort(function(a,b) {
+          return a.x > b.x;
+        });
+
         $("#list > *").remove();
         for(var i = 0; i < res.hacks.length; i++) {
           $("#list").append(createEntry(res.hacks[i]));
