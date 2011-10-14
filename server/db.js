@@ -62,8 +62,10 @@ exports.save = function(email, subdomain, url, desc, viz, cb) {
   });
 };
 
+// case insensitive conversion of a name into a link
 exports.nameToLink = function(name, cb) {
-  collection.findOne({ name: name }, function (err, rez) {
+  var re = new RegExp('^' + name + '$', 'i');
+  collection.findOne({ name: re }, function (err, rez) {
     if (err || !rez || !rez.url) cb(undefined);
     else cb(rez.url);
   });
