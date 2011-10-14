@@ -37,7 +37,6 @@ app.use(express.logger({ format: 'dev' }));
 // perform redirection
 app.use(function(req, resp, next) {
   var who = req.headers['host'];
-  console.log(who);
   if (!who) return next();
   if (/^(127.0.0.1|localhost)/.test(who)) return next();
   if (who === 'mozhacks.org') return next();
